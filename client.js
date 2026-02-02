@@ -573,10 +573,8 @@ function displayContents(contents) {
     inner.appendChild(card);
   });
 
-  // 카드가 2개 이상일 때만 무한 롤링 적용
+  // 콘텐츠 개수에 따라 애니메이션 속도 조절 (복제 없이)
   if (contents.length >= 2) {
-    const originalCards = inner.innerHTML;
-    inner.innerHTML = originalCards + originalCards;
     const duration = Math.max(15, contents.length * 3);
     inner.style.animationDuration = `${duration}s`;
   } else {
@@ -1142,10 +1140,8 @@ async function loadMoviesSection() {
       inner.appendChild(card);
     });
 
-    // 카드가 2개 이상일 때만 무한 롤링 적용
+    // 콘텐츠 개수에 따라 애니메이션 속도 조절 (복제 없이)
     if (moviesWithReview.length >= 2) {
-      const originalCards = inner.innerHTML;
-      inner.innerHTML = originalCards + originalCards;
       const duration = Math.max(12, moviesWithReview.length * 4);
       inner.style.animationDuration = `${duration}s`;
     } else {
@@ -1208,10 +1204,8 @@ async function loadBooksSection() {
       inner.appendChild(card);
     });
 
-    // 카드가 2개 이상일 때만 무한 롤링 적용
+    // 콘텐츠 개수에 따라 애니메이션 속도 조절 (복제 없이)
     if (booksWithReview.length >= 2) {
-      const originalCards = inner.innerHTML;
-      inner.innerHTML = originalCards + originalCards;
       const duration = Math.max(12, booksWithReview.length * 4);
       inner.style.animationDuration = `${duration}s`;
     } else {
@@ -1288,17 +1282,15 @@ async function loadReviewsSection() {
       inner.appendChild(card);
     });
 
-    // 카드가 2개 이상일 때만 무한 롤링 적용
+    // 콘텐츠 개수에 따라 애니메이션 속도 조절 (복제 없이)
     if (reviews.length >= 2) {
-      const originalCards = inner.innerHTML;
-      inner.innerHTML = originalCards + originalCards;
       const duration = Math.max(8, reviews.length * 3);
       inner.style.animationDuration = `${duration}s`;
     } else {
       inner.style.animation = 'none';
     }
 
-    console.log('✅ 리뷰 섹션 로드 완료! (자동 롤링)');
+    console.log('✅ 리뷰 섹션 로드 완료!');
 
   } catch (error) {
     // 에러가 발생하면 콘솔에 출력하고 사용자에게 알림
