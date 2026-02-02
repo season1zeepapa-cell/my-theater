@@ -221,8 +221,8 @@ app.get('/api/contents', async (req, res) => {
 
     query += ' GROUP BY c.id';
 
-    if (sort === 'rating') {
-      query += ' ORDER BY avg_rating DESC, c.created_at DESC';
+    if (sort === 'title') {
+      query += ' ORDER BY c.title ASC, c.created_at DESC';
     } else if (sort === 'date') {
       query += ' ORDER BY c.created_at DESC';
     } else {
