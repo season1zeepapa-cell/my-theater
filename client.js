@@ -265,7 +265,10 @@ async function loadContents() {
 
   // 로딩 표시
   loading.classList.remove('hidden');
-  grid.innerHTML = '';
+  // ⚠️ 버그 수정: grid.innerHTML = '' 대신 inner 요소만 비우기
+  // grid(horizontal-roller)를 비우면 내부의 contentsInner도 삭제됨
+  const inner = document.getElementById('contentsInner');
+  if (inner) inner.innerHTML = '';
   emptyState.classList.add('hidden');
 
   try {
