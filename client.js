@@ -77,12 +77,12 @@ function setSearchType(type) {
 
   if (type === 'movie') {
     // 영화 버튼 활성화
-    movieBtn.className = 'flex-1 bg-purple-600 text-white px-4 py-3 rounded-lg font-semibold transition';
-    bookBtn.className = 'flex-1 bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold hover:bg-gray-600 transition';
+    movieBtn.className = 'flex-1 bg-[#E50914] text-white px-4 py-3 rounded-lg font-semibold transition';
+    bookBtn.className = 'flex-1 bg-[#333] text-white px-4 py-3 rounded-lg font-semibold hover:bg-gray-600 transition';
   } else {
     // 도서 버튼 활성화
-    movieBtn.className = 'flex-1 bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold hover:bg-gray-600 transition';
-    bookBtn.className = 'flex-1 bg-purple-600 text-white px-4 py-3 rounded-lg font-semibold transition';
+    movieBtn.className = 'flex-1 bg-[#333] text-white px-4 py-3 rounded-lg font-semibold hover:bg-gray-600 transition';
+    bookBtn.className = 'flex-1 bg-[#E50914] text-white px-4 py-3 rounded-lg font-semibold transition';
   }
 
   // 검색 결과 초기화
@@ -157,7 +157,7 @@ function displaySearchResults(results) {
     // 포스터 이미지 또는 기본 그라데이션
     const posterHTML = item.poster_url
       ? `<img src="${item.poster_url}" alt="${item.title}" class="w-full aspect-[2/3] object-cover rounded-lg">`
-      : `<div class="w-full aspect-[2/3] bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-4xl">
+      : `<div class="w-full aspect-[2/3] bg-gradient-to-br from-[#E50914] to-[#b8070f] rounded-lg flex items-center justify-center text-4xl">
            ${item.type === 'movie' ? '🎬' : '📚'}
          </div>`;
 
@@ -170,11 +170,11 @@ function displaySearchResults(results) {
         <!-- gap-2: 버튼 사이 간격 8px -->
         <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-2">
           <!-- 리뷰 작성 버튼: 저장하면서 바로 리뷰 모달 열기 -->
-          <button onclick='addToArchiveAndReview(${JSON.stringify(item)})' class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-semibold text-sm">
+          <button onclick='addToArchiveAndReview(${JSON.stringify(item)})' class="bg-[#E50914] hover:bg-[#b8070f] px-4 py-2 rounded-lg font-semibold text-sm">
             ✍️ 리뷰 작성
           </button>
           <!-- 아카이브 추가 버튼: 리뷰 없이 저장만 -->
-          <button onclick='addToArchive(${JSON.stringify(item)})' class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg font-semibold text-sm">
+          <button onclick='addToArchive(${JSON.stringify(item)})' class="bg-gray-600 hover:bg-[#333] px-4 py-2 rounded-lg font-semibold text-sm">
             📥 아카이브 추가
           </button>
         </div>
@@ -445,7 +445,7 @@ function displayHeroContent(content) {
 
   heroSection.innerHTML = `
     <!-- 배경 이미지 영역 -->
-    <div class="absolute inset-0 ${content.poster_url ? '' : 'bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900'}">
+    <div class="absolute inset-0 ${content.poster_url ? '' : 'bg-gradient-to-r from-[#141414] via-[#1a1a1a] to-[#141414]'}">
       ${content.poster_url ? `<img src="${content.poster_url}" alt="${content.title}" class="w-full h-full object-cover">` : ''}
     </div>
 
@@ -456,7 +456,7 @@ function displayHeroContent(content) {
     <div class="relative z-10 h-full flex flex-col justify-end px-4 md:px-16 pb-16">
       <!-- 카테고리 태그 -->
       <div class="mb-4">
-        <span class="inline-block bg-purple-600 px-4 py-1 rounded-full text-sm font-semibold">
+        <span class="inline-block bg-[#E50914] px-4 py-1 rounded-full text-sm font-semibold">
           ${content.review_count > 0 ? '내 리뷰' : '최근 추가'}
         </span>
       </div>
@@ -530,7 +530,7 @@ function displayContents(contents) {
     // 포스터 이미지
     const posterHTML = content.poster_url
       ? `<img src="${content.poster_url}" alt="${content.title}" class="w-full aspect-[2/3] object-cover">`
-      : `<div class="w-full aspect-[2/3] bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-6xl">
+      : `<div class="w-full aspect-[2/3] bg-gradient-to-br from-[#E50914] to-[#b8070f] flex items-center justify-center text-6xl">
            ${content.type === 'movie' ? '🎬' : '📚'}
          </div>`;
 
@@ -540,7 +540,7 @@ function displayContents(contents) {
 
         <!-- 타입 라벨 배지 (왼쪽 상단) -->
         <div class="absolute top-2 left-2 z-10">
-          <span class="${content.type === 'movie' ? 'bg-purple-600' : 'bg-green-600'} text-white px-2 py-1 rounded text-xs font-semibold">
+          <span class="${content.type === 'movie' ? 'bg-[#E50914]' : 'bg-green-600'} text-white px-2 py-1 rounded text-xs font-semibold">
             ${content.type === 'movie' ? '🎬 영화' : '📚 책'}
           </span>
         </div>
@@ -549,10 +549,10 @@ function displayContents(contents) {
         <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
           <div class="flex gap-2">
             ${content.review_count > 0
-              ? `<button onclick="viewContentDetail(${content.id})" class="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm font-semibold">
+              ? `<button onclick="viewContentDetail(${content.id})" class="bg-[#E50914] hover:bg-[#b8070f] px-3 py-2 rounded text-sm font-semibold">
                    리뷰 보기
                  </button>`
-              : `<button onclick="openReviewModal(${content.id}, '${content.title}')" class="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-sm font-semibold">
+              : `<button onclick="openReviewModal(${content.id}, '${content.title}')" class="bg-[#E50914] hover:bg-[#b8070f] px-3 py-2 rounded text-sm font-semibold">
                    리뷰 작성
                  </button>`
             }
@@ -831,7 +831,7 @@ async function viewContentDetail(contentId) {
         <div class="text-center text-gray-400 py-8">
           <p class="text-lg mb-2">아직 작성된 리뷰가 없습니다.</p>
           <button onclick="closeReviewDetailModal(); openReviewModal(${contentId}, '${escapeHtml(content.title)}')"
-                  class="mt-4 bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-semibold transition">
+                  class="mt-4 bg-[#E50914] hover:bg-[#b8070f] px-6 py-2 rounded-lg font-semibold transition">
             첫 리뷰 작성하기
           </button>
         </div>
@@ -844,7 +844,7 @@ async function viewContentDetail(contentId) {
 
         // 리뷰 카드 생성
         const reviewCard = document.createElement('div');
-        reviewCard.className = 'bg-gray-700 rounded-lg p-5 space-y-3';
+        reviewCard.className = 'bg-[#333] rounded-lg p-5 space-y-3';
 
         reviewCard.innerHTML = `
           <!-- 별점과 작성일 -->
@@ -857,7 +857,7 @@ async function viewContentDetail(contentId) {
 
           <!-- 한줄평 -->
           ${review.one_liner ? `
-            <div class="text-lg font-semibold text-purple-300">
+            <div class="text-lg font-semibold text-[#E50914]">
               "${escapeHtml(review.one_liner)}"
             </div>
           ` : ''}
@@ -1332,13 +1332,13 @@ function createReviewCard(review) {
   // 카드 div 생성
   const card = document.createElement('div');
   // Tailwind CSS 클래스:
-  // bg-gray-800: 어두운 회색 배경
+  // bg-[#181818]: 어두운 회색 배경
   // rounded-lg: 모서리 둥글게
   // p-6: 내부 패딩 24px
   // hover:bg-gray-750: 마우스 호버 시 약간 밝게
   // transition: 부드러운 전환 효과
   // cursor-pointer: 마우스 커서를 포인터로 (클릭 가능함을 표시)
-  card.className = 'bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition cursor-pointer';
+  card.className = 'bg-[#181818] rounded-lg p-6 hover:bg-gray-750 transition cursor-pointer';
 
   // ⭐ 이벤트 위임용 데이터 속성 추가 (innerHTML 복제 시에도 유지됨)
   card.setAttribute('data-content-id', review.content_id);
@@ -1354,7 +1354,7 @@ function createReviewCard(review) {
   // movie: 보라색 배지 + 🎬 이모지
   // book: 초록색 배지 + 📚 이모지
   const typeBadge = review.content_type === 'movie'
-    ? '<span class="bg-purple-600 text-white px-2 py-1 rounded text-xs font-semibold">🎬 영화</span>'
+    ? '<span class="bg-[#E50914] text-white px-2 py-1 rounded text-xs font-semibold">🎬 영화</span>'
     : '<span class="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">📚 책</span>';
 
   // 카드 HTML 구성
@@ -1377,7 +1377,7 @@ function createReviewCard(review) {
 
     <!-- 한줄평 -->
     ${review.one_liner ? `
-      <p class="text-purple-300 text-sm mb-2 line-clamp-2">
+      <p class="text-[#E50914] text-sm mb-2 line-clamp-2">
         "${escapeHtml(review.one_liner)}"
       </p>
     ` : ''}
