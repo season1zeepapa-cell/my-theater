@@ -105,31 +105,34 @@
 
     <!-- 헤더 영역 -->
     <!-- sticky: 스크롤해도 상단에 고정되는 속성 -->
-    <!-- bg-gradient-to-b: 위에서 아래로 색상이 점진적으로 변하는 그라데이션 -->
     <!-- z-50: 다른 요소들보다 앞에 보이도록 설정 (숫자가 클수록 앞) -->
     <header class="sticky top-0 bg-[#141414] z-50 py-4 px-4 md:px-8">
-        <!-- flex: 가로로 요소를 배치 -->
-        <!-- justify-between: 요소들을 양 끝으로 배치 (중간은 자동으로 빈 공간) -->
-        <!-- items-center: 세로 가운데 정렬 -->
+        <!-- 3열 레이아웃: 로고(왼쪽) - 필터(중앙) - 버튼(오른쪽) -->
         <div class="flex justify-between items-center max-w-7xl mx-auto">
 
-            <!-- 로고 -->
-            <!-- text-3xl: 텍스트 크기를 크게 (3배) -->
-            <!-- font-bold: 글자를 굵게 -->
-            <!-- bg-gradient-to-r: 왼쪽에서 오른쪽으로 색상이 변하는 그라데이션 -->
-            <!-- bg-clip-text: 그라데이션을 텍스트 모양으로 자름 -->
-            <!-- text-transparent: 텍스트를 투명하게 해서 그라데이션만 보이게 -->
-            <h1 class="text-3xl font-bold text-[#E50914] cursor-pointer" onclick="window.location.reload()">
+            <!-- 로고 (왼쪽) -->
+            <h1 class="text-2xl md:text-3xl font-bold text-[#E50914] cursor-pointer" onclick="window.location.reload()">
                 🎬 My Theater
             </h1>
 
-            <!-- 검색 및 추가 영역 -->
-            <div class="flex items-center gap-4">
-                <!-- 콘텐츠 추가 버튼 -->
-                <button onclick="toggleSearchModal()" class="bg-[#E50914] hover:bg-[#b8070f] px-4 py-2 rounded-lg font-semibold transition">
-                    ➕ 콘텐츠 추가
-                </button>
+            <!-- 필터 (중앙) -->
+            <div class="flex items-center gap-2 md:gap-4">
+                <select id="typeFilter" onchange="applyFilters()" class="bg-[#333] text-white text-sm md:text-base px-2 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E50914]">
+                    <option value="">전체</option>
+                    <option value="movie">영화</option>
+                    <option value="book">도서</option>
+                </select>
+                <select id="sortFilter" onchange="applyFilters()" class="bg-[#333] text-white text-sm md:text-base px-2 md:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E50914]">
+                    <option value="date">최신순</option>
+                    <option value="title">제목순</option>
+                </select>
             </div>
+
+            <!-- 콘텐츠 추가 버튼 (오른쪽) -->
+            <button onclick="toggleSearchModal()" class="bg-[#E50914] hover:bg-[#b8070f] px-3 md:px-4 py-2 rounded-lg font-semibold transition text-sm md:text-base">
+                <span class="hidden md:inline">➕ 콘텐츠 추가</span>
+                <span class="md:hidden">➕</span>
+            </button>
         </div>
     </header>
 
@@ -337,26 +340,6 @@
                     편집하기
                 </button>
             </div>
-        </div>
-    </section>
-
-    <!-- 필터 영역 -->
-    <section class="bg-[#181818] py-4 px-4 md:px-8 sticky top-16 z-40">
-        <div class="max-w-7xl mx-auto flex flex-wrap gap-4 items-center">
-            <label class="text-gray-400 font-semibold">필터:</label>
-
-            <!-- 타입 필터 -->
-            <select id="typeFilter" onchange="applyFilters()" class="bg-[#333] text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E50914]">
-                <option value="">전체</option>
-                <option value="movie">영화만</option>
-                <option value="book">도서만</option>
-            </select>
-
-            <!-- 정렬 옵션 -->
-            <select id="sortFilter" onchange="applyFilters()" class="bg-[#333] text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E50914]">
-                <option value="date">최신순</option>
-                <option value="title">제목순</option>
-            </select>
         </div>
     </section>
 
