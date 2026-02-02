@@ -439,6 +439,9 @@ function displayContents(contents) {
     const card = document.createElement('div');
     card.className = 'group cursor-pointer content-card-mobile snap-item';
 
+    // ⭐ 이벤트 위임용 데이터 속성 추가 (innerHTML 복제 시에도 유지됨)
+    card.setAttribute('data-content-id', content.id);
+
     // 별점 표시
     const avgRating = parseFloat(content.avg_rating) || 0;
     const stars = '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating));
@@ -579,15 +582,36 @@ function setupRollerClickControl() {
         inner.style.animationPlayState = 'paused';
         rollerPausedState[id] = true;
 
-        // 이벤트 전파 중단 (버튼 클릭 방지)
+        // 이벤트 전파 중단 (버튼/카드 클릭 방지)
         event.stopPropagation();
         event.preventDefault();
 
         console.log(`🛑 ${id} 롤링 멈춤 - 다시 클릭하면 원래 기능 실행`);
       } else {
         // 🟢 일시정지 중일 때 클릭 → 원래 기능 실행
-        // (이벤트 전파 허용 - 버튼 클릭이 동작함)
-        console.log(`▶️ ${id} 원래 기능 실행`);
+        // 롤러를 다시 재생 상태로 변경 (다음 클릭은 다시 멈춤)
+        inner.style.animationPlayState = 'running';
+        rollerPausedState[id] = false;
+
+        // 버튼을 클릭했는지 확인 (아카이브 오버레이 버튼)
+        const clickedButton = event.target.closest('button');
+        if (clickedButton) {
+          // 버튼 클릭 → inline onclick이 실행되도록 허용
+          console.log(`▶️ ${id} 버튼 클릭`);
+          // stopPropagation/preventDefault 호출 안 함 → 버튼의 onclick 실행
+        } else {
+          // ⭐ 이벤트 위임: 클릭된 카드의 data-content-id 찾기
+          const card = event.target.closest('[data-content-id]');
+          if (card) {
+            const contentId = card.getAttribute('data-content-id');
+            console.log(`▶️ ${id} 카드 클릭 → viewContentDetail(${contentId})`);
+            viewContentDetail(contentId);
+          }
+
+          // 이벤트 전파 중단 (중복 실행 방지)
+          event.stopPropagation();
+          event.preventDefault();
+        }
       }
     }, true); // 캡처 단계에서 처리 (버튼보다 먼저)
   });
@@ -943,6 +967,9 @@ function createContentCard(content) {
   // snap-item: 스와이프 시 카드에 딱 맞게 멈춤
   card.className = 'group cursor-pointer content-card-mobile snap-item';
 
+  // ⭐ 이벤트 위임용 데이터 속성 추가 (innerHTML 복제 시에도 유지됨)
+  card.setAttribute('data-content-id', content.id);
+
   // 평균 평점 계산 (소수점 1자리)
   // parseFloat: 문자열을 숫자로 변환, || 0: 값이 없으면 0 사용
   const rating = parseFloat(content.avg_rating) || 0;
@@ -989,12 +1016,9 @@ function createContentCard(content) {
     </div>
   `;
 
-  // 클릭 시 리뷰 상세 보기
-  // viewContentDetail: 콘텐츠 정보 + 리뷰 목록을 alert로 표시하는 함수
-  // content.id: 클릭한 콘텐츠의 ID (데이터베이스 고유 번호)
-  card.onclick = () => {
-    viewContentDetail(content.id); // 리뷰 상세 보기 함수 호출
-  };
+  // ⭐ onclick은 innerHTML 복제 시 손실되므로 제거
+  // 대신 이벤트 위임으로 처리 (setupRollerClickControl에서)
+  // 카드의 data-content-id 속성을 사용하여 클릭 처리
 
   return card; // 생성된 카드 반환
 }
@@ -1216,6 +1240,9 @@ function createReviewCard(review) {
   // cursor-pointer: 마우스 커서를 포인터로 (클릭 가능함을 표시)
   card.className = 'bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition cursor-pointer';
 
+  // ⭐ 이벤트 위임용 데이터 속성 추가 (innerHTML 복제 시에도 유지됨)
+  card.setAttribute('data-content-id', review.content_id);
+
   // 별점 표시
   // ★: 채워진 별, ☆: 빈 별
   const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
@@ -1263,11 +1290,9 @@ function createReviewCard(review) {
     ` : ''}
   `;
 
-  // 클릭 시 리뷰 상세 보기 모달 열기
-  // viewContentDetail: 리뷰 상세 모달을 여는 함수
-  card.onclick = () => {
-    viewContentDetail(review.content_id);
-  };
+  // ⭐ onclick은 innerHTML 복제 시 손실되므로 제거
+  // 대신 이벤트 위임으로 처리 (setupRollerClickControl에서)
+  // 카드의 data-content-id 속성을 사용하여 클릭 처리
 
   return card; // 생성된 카드 반환
 }
