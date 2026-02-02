@@ -1042,15 +1042,15 @@ async function loadBooksSection() {
 }
 
 // ====================================
-// 19-1단계: 내가 쓴 리뷰 섹션 로드 (최신 6개)
+// 19-1단계: 내가 쓴 리뷰 섹션 로드 (자동 롤링)
 // ====================================
-// loadReviewsSection: 데이터베이스에서 최신 리뷰 6개를 가져와서 화면에 표시
+// loadReviewsSection: 데이터베이스에서 최신 리뷰를 가져와서 자동 롤링 표시
 async function loadReviewsSection() {
   console.log('📝 리뷰 섹션 로드 시작...');
   try {
     // API 호출: 모든 리뷰를 최신순으로 가져오기
-    // GET /api/reviews?sort=date&limit=6
-    const response = await fetch('/api/reviews?sort=date&limit=6');
+    // GET /api/reviews?sort=date&limit=10 (롤링용으로 10개 가져오기)
+    const response = await fetch('/api/reviews?sort=date&limit=10');
     console.log('API 응답 상태:', response.status);
 
     // 서버 응답이 정상이 아니면 에러 발생
@@ -1062,47 +1062,58 @@ async function loadReviewsSection() {
     const reviews = await response.json();
     console.log('받아온 리뷰 개수:', reviews.length);
 
-    // 그리드 컨테이너 찾기
-    const grid = document.getElementById('reviewsGrid');
-    if (!grid) {
-      console.error('❌ reviewsGrid 요소를 찾을 수 없습니다!');
+    // 롤링 inner 컨테이너 찾기
+    const inner = document.getElementById('reviewsInner');
+    if (!inner) {
+      console.error('❌ reviewsInner 요소를 찾을 수 없습니다!');
       return;
     }
 
     // 기존 내용 초기화 (빈 HTML로 만들기)
-    grid.innerHTML = '';
+    inner.innerHTML = '';
 
     // 리뷰가 없으면 안내 메시지 표시
     if (reviews.length === 0) {
-      // col-span-full: 모든 열을 차지 (그리드 전체 너비 사용)
-      // text-center: 텍스트 가운데 정렬
-      // py-8: 위아래 패딩 32px
-      grid.innerHTML = `
-        <div class="col-span-full text-center text-gray-400 py-8">
+      inner.innerHTML = `
+        <div class="text-center text-gray-400 py-8">
           <p class="text-lg mb-2">아직 작성한 리뷰가 없습니다.</p>
           <p class="text-sm">콘텐츠를 추가하고 리뷰를 작성해보세요!</p>
         </div>
       `;
+      // 애니메이션 비활성화
+      inner.style.animation = 'none';
       return; // 함수 종료
     }
 
     // 각 리뷰에 대해 카드 생성
-    // forEach: 배열의 각 요소마다 반복 실행
     reviews.forEach(review => {
-      const card = createReviewCard(review); // 리뷰 카드 생성
-      grid.appendChild(card); // 그리드에 카드 추가
+      const card = createReviewCard(review);
+      card.classList.add('review-card-fixed'); // 고정 높이 클래스 추가
+      inner.appendChild(card);
     });
-    console.log('✅ 리뷰 섹션 로드 완료!');
+
+    // 무한 롤링을 위해 리뷰 카드 복제 (2배로)
+    // 원본 카드들을 복제해서 뒤에 붙임 → 끊김 없는 롤링 효과
+    const originalCards = inner.innerHTML;
+    inner.innerHTML = originalCards + originalCards;
+
+    // 리뷰 개수에 따라 애니메이션 속도 조절
+    // 리뷰가 많을수록 천천히 스크롤
+    const duration = Math.max(8, reviews.length * 3);
+    inner.style.animationDuration = `${duration}s`;
+
+    console.log('✅ 리뷰 섹션 로드 완료! (자동 롤링)');
 
   } catch (error) {
     // 에러가 발생하면 콘솔에 출력하고 사용자에게 알림
     console.error('❌ 리뷰 섹션 로드 오류:', error);
     console.error('오류 상세:', error.message);
     console.error('오류 스택:', error.stack);
-    const grid = document.getElementById('reviewsGrid');
-    if (grid) {
-      grid.innerHTML =
-        '<p class="col-span-full text-red-400 text-sm text-center">리뷰를 불러오는 중 오류가 발생했습니다.</p>';
+    const inner = document.getElementById('reviewsInner');
+    if (inner) {
+      inner.innerHTML =
+        '<p class="text-red-400 text-sm text-center py-8">리뷰를 불러오는 중 오류가 발생했습니다.</p>';
+      inner.style.animation = 'none';
     }
   }
 }
