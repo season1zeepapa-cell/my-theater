@@ -525,6 +525,9 @@ function closeReviewModal() {
 
   // 수정 모드 초기화 (다음에 모달을 열 때 작성 모드가 되도록)
   currentEditingReviewId = null;
+
+  // ⭐ 모달이 닫힐 때 모든 롤러 다시 재생
+  resumeAllRollers();
 }
 
 // ====================================
@@ -589,22 +592,20 @@ function setupRollerClickControl() {
         console.log(`🛑 ${id} 롤링 멈춤 - 다시 클릭하면 원래 기능 실행`);
       } else {
         // 🟢 일시정지 중일 때 클릭 → 원래 기능 실행
-        // 롤러를 다시 재생 상태로 변경 (다음 클릭은 다시 멈춤)
-        inner.style.animationPlayState = 'running';
-        rollerPausedState[id] = false;
+        // ⚠️ 롤러는 멈춘 상태 유지! (모달이 닫힐 때 재생)
 
         // 버튼을 클릭했는지 확인 (아카이브 오버레이 버튼)
         const clickedButton = event.target.closest('button');
         if (clickedButton) {
           // 버튼 클릭 → inline onclick이 실행되도록 허용
-          console.log(`▶️ ${id} 버튼 클릭`);
+          console.log(`▶️ ${id} 버튼 클릭 (롤링 멈춤 유지)`);
           // stopPropagation/preventDefault 호출 안 함 → 버튼의 onclick 실행
         } else {
           // ⭐ 이벤트 위임: 클릭된 카드의 data-content-id 찾기
           const card = event.target.closest('[data-content-id]');
           if (card) {
             const contentId = card.getAttribute('data-content-id');
-            console.log(`▶️ ${id} 카드 클릭 → viewContentDetail(${contentId})`);
+            console.log(`▶️ ${id} 카드 클릭 → viewContentDetail(${contentId}) (롤링 멈춤 유지)`);
             viewContentDetail(contentId);
           }
 
@@ -821,6 +822,9 @@ async function viewContentDetail(contentId) {
 function closeReviewDetailModal() {
   // hidden 클래스 추가 → 모달이 숨겨짐
   document.getElementById('reviewDetailModal').classList.add('hidden');
+
+  // ⭐ 모달이 닫힐 때 모든 롤러 다시 재생
+  resumeAllRollers();
 }
 
 // ====================================
