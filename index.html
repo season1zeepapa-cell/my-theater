@@ -346,14 +346,14 @@
             <label class="text-gray-400 font-semibold">필터:</label>
 
             <!-- 타입 필터 -->
-            <select id="typeFilter" onchange="loadContents()" class="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <select id="typeFilter" onchange="applyFilters()" class="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                 <option value="">전체</option>
                 <option value="movie">영화만</option>
                 <option value="book">도서만</option>
             </select>
 
             <!-- 정렬 옵션 -->
-            <select id="sortFilter" onchange="loadContents()" class="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <select id="sortFilter" onchange="applyFilters()" class="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                 <option value="date">최신순</option>
                 <option value="title">제목순</option>
             </select>

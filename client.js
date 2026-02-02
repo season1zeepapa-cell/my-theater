@@ -272,6 +272,42 @@ async function addToArchiveAndReview(item) {
 }
 
 // ====================================
+// 7-1단계: 필터 적용 (모든 섹션에 적용)
+// ====================================
+// applyFilters: 필터바 변경 시 모든 섹션에 필터 적용
+function applyFilters() {
+  // 필터 값 가져오기
+  const type = document.getElementById('typeFilter').value;
+
+  // 섹션 요소 가져오기
+  const moviesSection = document.getElementById('moviesGrid').closest('section');
+  const booksSection = document.getElementById('booksGrid').closest('section');
+
+  // 타입 필터에 따라 섹션 표시/숨김
+  if (type === 'movie') {
+    // 영화만: 책 섹션 숨김
+    if (moviesSection) moviesSection.classList.remove('hidden');
+    if (booksSection) booksSection.classList.add('hidden');
+  } else if (type === 'book') {
+    // 책만: 영화 섹션 숨김
+    if (moviesSection) moviesSection.classList.add('hidden');
+    if (booksSection) booksSection.classList.remove('hidden');
+  } else {
+    // 전체: 모든 섹션 표시
+    if (moviesSection) moviesSection.classList.remove('hidden');
+    if (booksSection) booksSection.classList.remove('hidden');
+  }
+
+  // 모든 섹션 새로고침 (필터/정렬 적용)
+  loadContents();
+  loadMoviesSection();
+  loadBooksSection();
+  loadReviewsSection();
+
+  console.log(`🔍 필터 적용: type=${type || '전체'}`);
+}
+
+// ====================================
 // 8단계: 저장된 콘텐츠 목록 불러오기
 // ====================================
 async function loadContents() {
@@ -1078,8 +1114,11 @@ function createContentCard(content) {
 // loadMoviesSection: 리뷰가 있는 영화를 자동 롤링으로 표시
 async function loadMoviesSection() {
   try {
-    // API 호출: 영화만 필터링, 최신순 정렬
-    const response = await fetch('/api/contents?type=movie&sort=date');
+    // 정렬 필터 값 가져오기
+    const sort = document.getElementById('sortFilter').value || 'date';
+
+    // API 호출: 영화만 필터링, 필터바 정렬 적용
+    const response = await fetch(`/api/contents?type=movie&sort=${sort}`);
 
     if (!response.ok) {
       throw new Error('영화 목록을 불러올 수 없습니다');
@@ -1139,8 +1178,11 @@ async function loadMoviesSection() {
 // loadBooksSection: 리뷰가 있는 책을 자동 롤링으로 표시
 async function loadBooksSection() {
   try {
-    // API 호출: 책만 필터링, 최신순 정렬
-    const response = await fetch('/api/contents?type=book&sort=date');
+    // 정렬 필터 값 가져오기
+    const sort = document.getElementById('sortFilter').value || 'date';
+
+    // API 호출: 책만 필터링, 필터바 정렬 적용
+    const response = await fetch(`/api/contents?type=book&sort=${sort}`);
 
     if (!response.ok) {
       throw new Error('책 목록을 불러올 수 없습니다');
@@ -1201,9 +1243,12 @@ async function loadBooksSection() {
 async function loadReviewsSection() {
   console.log('📝 리뷰 섹션 로드 시작...');
   try {
+    // 필터 값 가져오기
+    const type = document.getElementById('typeFilter').value;
+
     // API 호출: 모든 리뷰를 최신순으로 가져오기
     // GET /api/reviews?sort=date&limit=10 (롤링용으로 10개 가져오기)
-    const response = await fetch('/api/reviews?sort=date&limit=10');
+    const response = await fetch('/api/reviews?sort=date&limit=20');
     console.log('API 응답 상태:', response.status);
 
     // 서버 응답이 정상이 아니면 에러 발생
@@ -1212,8 +1257,14 @@ async function loadReviewsSection() {
     }
 
     // JSON 형태로 변환
-    const reviews = await response.json();
-    console.log('받아온 리뷰 개수:', reviews.length);
+    let reviews = await response.json();
+
+    // 타입 필터 적용 (클라이언트에서 필터링)
+    if (type) {
+      reviews = reviews.filter(review => review.content_type === type);
+    }
+
+    console.log('필터 적용 후 리뷰 개수:', reviews.length);
 
     // 롤링 inner 컨테이너 찾기
     const inner = document.getElementById('reviewsInner');
