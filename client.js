@@ -10,6 +10,16 @@ let currentRating = 0;
 // 리뷰 수정 모드 추적 (null: 작성 모드, 숫자: 수정 모드의 리뷰 ID)
 let currentEditingReviewId = null;
 
+// 롤러 일시정지 상태 추적
+// true: 일시정지 중 (다음 클릭 시 원래 기능 실행)
+// false: 롤링 중 (클릭하면 멈춤)
+let rollerPausedState = {
+  contentsInner: false,
+  moviesInner: false,
+  booksInner: false,
+  reviewsInner: false
+};
+
 // ====================================
 // 2단계: 페이지가 로드되면 실행되는 함수
 // ====================================
@@ -29,6 +39,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 별점 클릭 이벤트 설정
   setupStarRating();
+
+  // 롤러 클릭 이벤트 설정 (클릭으로 일시정지/재생)
+  setupRollerClickControl();
 });
 
 // ====================================
@@ -541,6 +554,58 @@ function setupStarRating() {
       setRating(rating);
     });
   });
+}
+
+// ====================================
+// 13-1단계: 롤러 클릭 제어 설정
+// ====================================
+// 클릭으로 롤링을 멈추고, 다시 클릭하면 원래 기능 실행
+function setupRollerClickControl() {
+  // 모든 롤러 Inner 요소에 클릭 이벤트 추가
+  const rollerIds = ['contentsInner', 'moviesInner', 'booksInner', 'reviewsInner'];
+
+  rollerIds.forEach(id => {
+    const inner = document.getElementById(id);
+    if (!inner) return;
+
+    // 클릭 이벤트 리스너 추가 (캡처 단계에서 먼저 처리)
+    inner.addEventListener('click', function(event) {
+      // 현재 롤러가 롤링 중인지 확인
+      const isPaused = rollerPausedState[id];
+
+      if (!isPaused) {
+        // 🔴 롤링 중일 때 클릭 → 일시정지
+        // 애니메이션 일시정지
+        inner.style.animationPlayState = 'paused';
+        rollerPausedState[id] = true;
+
+        // 이벤트 전파 중단 (버튼 클릭 방지)
+        event.stopPropagation();
+        event.preventDefault();
+
+        console.log(`🛑 ${id} 롤링 멈춤 - 다시 클릭하면 원래 기능 실행`);
+      } else {
+        // 🟢 일시정지 중일 때 클릭 → 원래 기능 실행
+        // (이벤트 전파 허용 - 버튼 클릭이 동작함)
+        console.log(`▶️ ${id} 원래 기능 실행`);
+      }
+    }, true); // 캡처 단계에서 처리 (버튼보다 먼저)
+  });
+}
+
+// 롤러 다시 재생 (외부 영역 클릭 시 또는 특정 액션 후)
+function resumeAllRollers() {
+  const rollerIds = ['contentsInner', 'moviesInner', 'booksInner', 'reviewsInner'];
+
+  rollerIds.forEach(id => {
+    const inner = document.getElementById(id);
+    if (inner) {
+      inner.style.animationPlayState = 'running';
+      rollerPausedState[id] = false;
+    }
+  });
+
+  console.log('▶️ 모든 롤러 재생');
 }
 
 // ====================================
