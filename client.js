@@ -644,9 +644,9 @@ function setupStarRating() {
 }
 
 // ====================================
-// 13-1단계: 롤러 클릭 제어 설정
+// 13-1단계: 롤러 클릭 제어 설정 (통합)
 // ====================================
-// 클릭으로 롤링을 멈추고, 다시 클릭하면 원래 기능 실행
+// 한 번 클릭으로 롤링 멈춤 + 모달 열기 동시 처리
 function setupRollerClickControl() {
   // 모든 롤러 Inner 요소에 클릭 이벤트 추가
   const rollerIds = ['contentsInner', 'moviesInner', 'booksInner', 'reviewsInner'];
@@ -657,45 +657,30 @@ function setupRollerClickControl() {
 
     // 클릭 이벤트 리스너 추가 (캡처 단계에서 먼저 처리)
     inner.addEventListener('click', function(event) {
-      // 현재 롤러가 롤링 중인지 확인
-      const isPaused = rollerPausedState[id];
+      // 🔴 롤링 멈춤
+      inner.style.animationPlayState = 'paused';
+      rollerPausedState[id] = true;
 
-      if (!isPaused) {
-        // 🔴 롤링 중일 때 클릭 → 일시정지
-        // 애니메이션 일시정지
-        inner.style.animationPlayState = 'paused';
-        rollerPausedState[id] = true;
+      // 버튼을 클릭했는지 확인 (아카이브 오버레이 버튼)
+      const clickedButton = event.target.closest('button');
+      if (clickedButton) {
+        // 버튼 클릭 → inline onclick이 실행되도록 허용
+        console.log(`🎯 ${id} 버튼 클릭`);
+        // stopPropagation/preventDefault 호출 안 함 → 버튼의 onclick 실행
+      } else {
+        // ⭐ 카드 클릭 → 바로 모달 열기
+        const card = event.target.closest('[data-content-id]');
+        if (card) {
+          const contentId = card.getAttribute('data-content-id');
+          console.log(`🎯 ${id} 카드 클릭 → viewContentDetail(${contentId})`);
+          viewContentDetail(contentId);
+        }
 
-        // 이벤트 전파 중단 (버튼/카드 클릭 방지)
+        // 이벤트 전파 중단
         event.stopPropagation();
         event.preventDefault();
-
-        console.log(`🛑 ${id} 롤링 멈춤 - 다시 클릭하면 원래 기능 실행`);
-      } else {
-        // 🟢 일시정지 중일 때 클릭 → 원래 기능 실행
-        // ⚠️ 롤러는 멈춘 상태 유지! (모달이 닫힐 때 재생)
-
-        // 버튼을 클릭했는지 확인 (아카이브 오버레이 버튼)
-        const clickedButton = event.target.closest('button');
-        if (clickedButton) {
-          // 버튼 클릭 → inline onclick이 실행되도록 허용
-          console.log(`▶️ ${id} 버튼 클릭 (롤링 멈춤 유지)`);
-          // stopPropagation/preventDefault 호출 안 함 → 버튼의 onclick 실행
-        } else {
-          // ⭐ 이벤트 위임: 클릭된 카드의 data-content-id 찾기
-          const card = event.target.closest('[data-content-id]');
-          if (card) {
-            const contentId = card.getAttribute('data-content-id');
-            console.log(`▶️ ${id} 카드 클릭 → viewContentDetail(${contentId}) (롤링 멈춤 유지)`);
-            viewContentDetail(contentId);
-          }
-
-          // 이벤트 전파 중단 (중복 실행 방지)
-          event.stopPropagation();
-          event.preventDefault();
-        }
       }
-    }, true); // 캡처 단계에서 처리 (버튼보다 먼저)
+    }, true); // 캡처 단계에서 처리
   });
 }
 
