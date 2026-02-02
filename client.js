@@ -20,6 +20,11 @@ let rollerPausedState = {
   reviewsInner: false
 };
 
+// 히어로 슬라이드쇼 관련 변수
+let heroContents = [];        // 히어로에 표시할 콘텐츠 배열
+let heroCurrentIndex = 0;     // 현재 표시 중인 인덱스
+let heroIntervalId = null;    // setInterval ID (중복 실행 방지)
+
 // ====================================
 // 2단계: 페이지가 로드되면 실행되는 함수
 // ====================================
@@ -336,9 +341,9 @@ async function loadContents() {
     // 콘텐츠가 있으면 표시
     contentsSection.classList.remove('hidden');
 
-    // 첫 번째 콘텐츠를 히어로 섹션에 표시
+    // ⭐ 히어로 슬라이드쇼 시작 (5초 간격으로 자동 교체)
     if (contentsWithoutReview.length > 0) {
-      displayHeroContent(contentsWithoutReview[0]);
+      startHeroSlideshow(contentsWithoutReview);
       heroSection.classList.remove('hidden');
     }
 
@@ -353,7 +358,47 @@ async function loadContents() {
 }
 
 // ====================================
-// 9단계: 히어로 섹션에 추천 콘텐츠 표시
+// 9단계: 히어로 슬라이드쇼 (5초 간격 자동 교체)
+// ====================================
+// startHeroSlideshow: 아카이브 콘텐츠를 5초 간격으로 히어로에 표시
+// 매개변수 contents: 표시할 콘텐츠 배열
+function startHeroSlideshow(contents) {
+  // 기존 슬라이드쇼 정리 (중복 실행 방지)
+  if (heroIntervalId) {
+    clearInterval(heroIntervalId);
+  }
+
+  // 콘텐츠 저장
+  heroContents = contents;
+  heroCurrentIndex = 0;
+
+  // 첫 번째 콘텐츠 표시
+  displayHeroContent(heroContents[heroCurrentIndex]);
+
+  // 콘텐츠가 2개 이상일 때만 자동 교체
+  if (heroContents.length > 1) {
+    // 5초(5000ms)마다 다음 콘텐츠로 교체
+    heroIntervalId = setInterval(() => {
+      // 다음 인덱스 계산 (마지막이면 처음으로)
+      heroCurrentIndex = (heroCurrentIndex + 1) % heroContents.length;
+
+      // 페이드 효과와 함께 콘텐츠 교체
+      const heroSection = document.getElementById('heroSection');
+      heroSection.style.opacity = '0';
+
+      setTimeout(() => {
+        displayHeroContent(heroContents[heroCurrentIndex]);
+        heroSection.style.opacity = '1';
+      }, 300); // 0.3초 후 새 콘텐츠 표시
+
+    }, 5000); // 5초 간격
+
+    console.log(`🎬 히어로 슬라이드쇼 시작 (${heroContents.length}개 콘텐츠, 5초 간격)`);
+  }
+}
+
+// ====================================
+// 9-1단계: 히어로 섹션에 콘텐츠 표시
 // ====================================
 function displayHeroContent(content) {
   const heroSection = document.getElementById('heroSection');
