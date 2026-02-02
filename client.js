@@ -411,7 +411,7 @@ function displayContents(contents) {
 
   contents.forEach(content => {
     const card = document.createElement('div');
-    card.className = 'group cursor-pointer w-48';
+    card.className = 'group cursor-pointer content-card-mobile snap-item';
 
     // 별점 표시
     const avgRating = parseFloat(content.avg_rating) || 0;
@@ -860,8 +860,10 @@ async function deleteContent(contentId) {
 function createContentCard(content) {
   // 카드 컨테이너 생성
   const card = document.createElement('div');
-  // Tailwind CSS 클래스: group(그룹), flex-shrink-0(축소 방지), w-48(너비 48), cursor-pointer(커서 손가락 모양)
-  card.className = 'group flex-shrink-0 w-48 cursor-pointer';
+  // Tailwind CSS 클래스: group(그룹), cursor-pointer(커서 손가락 모양)
+  // content-card-mobile: 모바일에서 2개 카드가 보이도록 반응형 너비
+  // snap-item: 스와이프 시 카드에 딱 맞게 멈춤
+  card.className = 'group cursor-pointer content-card-mobile snap-item';
 
   // 평균 평점 계산 (소수점 1자리)
   // parseFloat: 문자열을 숫자로 변환, || 0: 값이 없으면 0 사용

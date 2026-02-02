@@ -15,6 +15,49 @@
         body {
             font-family: 'Noto Sans KR', sans-serif;
         }
+
+        /* 모바일 반응형 콘텐츠 카드 */
+        /* 모바일에서 2개 카드가 화면에 보이도록 계산 */
+        /* 계산: (화면너비 - 좌우패딩32px - 간격16px) / 2 */
+        .content-card-mobile {
+            width: calc((100vw - 48px) / 2);
+            min-width: 140px;
+            max-width: 192px;
+            flex-shrink: 0;
+        }
+
+        /* 태블릿/데스크탑: 고정 너비 */
+        @media (min-width: 768px) {
+            .content-card-mobile {
+                width: 192px;
+            }
+        }
+
+        /* 가로 스크롤 컨테이너 */
+        /* Netflix 스타일의 가로 스크롤 레이아웃 */
+        .horizontal-scroll {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 스크롤바 숨김 (깔끔한 UI) */
+        .horizontal-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .horizontal-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 스냅 스크롤 (카드에 딱 맞게 멈춤) */
+        .snap-item {
+            scroll-snap-align: start;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -301,7 +344,7 @@
         <!-- 내 아카이브 -->
         <section id="mainArchive">
             <h3 class="text-2xl font-bold mb-6">내 아카이브</h3>
-            <div id="contentsGrid" class="grid gap-4 justify-center" style="grid-template-columns: repeat(auto-fill, 192px);">
+            <div id="contentsGrid" class="horizontal-scroll">
                 <!-- 여기에 저장된 콘텐츠가 동적으로 추가됩니다 -->
             </div>
         </section>
@@ -447,7 +490,7 @@
             <!-- overflow-x-auto: 가로 스크롤 가능 -->
             <!-- flex gap-4: 카드 사이 간격 4 -->
             <!-- pb-4: 아래 패딩 4 (스크롤바 공간 확보) -->
-            <div id="moviesGrid" class="flex gap-4 overflow-x-auto pb-4">
+            <div id="moviesGrid" class="horizontal-scroll">
                 <!-- 여기에 JavaScript의 loadMoviesSection() 함수로 영화 카드가 동적으로 추가됩니다 -->
             </div>
         </section>
@@ -466,7 +509,7 @@
             <!-- overflow-x-auto: 가로 스크롤 가능 -->
             <!-- flex gap-4: 카드 사이 간격 4 -->
             <!-- pb-4: 아래 패딩 4 (스크롤바 공간 확보) -->
-            <div id="booksGrid" class="flex gap-4 overflow-x-auto pb-4">
+            <div id="booksGrid" class="horizontal-scroll">
                 <!-- 여기에 JavaScript의 loadBooksSection() 함수로 책 카드가 동적으로 추가됩니다 -->
             </div>
         </section>
