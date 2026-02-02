@@ -270,9 +270,8 @@
     </div>
 
     <!-- 히어로 섹션 (오늘의 추천) -->
-    <!-- relative: 내부의 절대 위치 요소들의 기준점 -->
-    <!-- h-[40vh]: 화면 높이의 40% 크기 (모바일 최적화) -->
-    <section id="heroSection" class="relative h-[40vh] mb-8">
+    <!-- 모바일: 50vh, 데스크탑: 60vh -->
+    <section id="heroSection" class="relative h-[50vh] md:h-[60vh] mb-4 md:mb-8">
         <!-- 배경 이미지 영역 -->
         <!-- absolute: 부모 요소(section) 안에서 절대 위치 -->
         <!-- inset-0: top, right, bottom, left 모두 0 (전체 영역 차지) -->

@@ -446,53 +446,53 @@ function displayHeroContent(content) {
   heroSection.innerHTML = `
     <!-- 배경 이미지 영역 -->
     <div class="absolute inset-0 ${content.poster_url ? '' : 'bg-gradient-to-r from-[#141414] via-[#1a1a1a] to-[#141414]'}">
-      ${content.poster_url ? `<img src="${content.poster_url}" alt="${content.title}" class="w-full h-full object-cover">` : ''}
+      ${content.poster_url ? `<img src="${content.poster_url}" alt="${content.title}" class="w-full h-full object-cover object-top">` : ''}
     </div>
 
-    <!-- 어두운 오버레이 -->
-    <div class="absolute inset-0 bg-black/50"></div>
+    <!-- 어두운 그라데이션 오버레이 (아래쪽으로 더 진하게) -->
+    <div class="absolute inset-0 bg-gradient-to-t from-[#141414] via-black/60 to-transparent"></div>
 
     <!-- 텍스트 내용 -->
-    <div class="relative z-10 h-full flex flex-col justify-end px-4 md:px-16 pb-16">
-      <!-- 카테고리 태그 -->
-      <div class="mb-4">
-        <span class="inline-block bg-[#E50914] px-4 py-1 rounded-full text-sm font-semibold">
+    <div class="relative z-10 h-full flex flex-col justify-end px-4 md:px-16 pb-4 md:pb-8">
+      <!-- 카테고리 태그 + 타입 -->
+      <div class="flex items-center gap-2 mb-2 md:mb-4">
+        <span class="inline-block bg-[#E50914] px-3 py-1 rounded-full text-xs md:text-sm font-semibold">
           ${content.review_count > 0 ? '내 리뷰' : '최근 추가'}
         </span>
+        <span class="text-gray-300 text-xs md:text-sm">${content.type === 'movie' ? '🎬 영화' : '📚 도서'}</span>
       </div>
 
       <!-- 제목 -->
-      <h2 class="text-5xl md:text-7xl font-bold mb-4 max-w-3xl">
+      <h2 class="text-2xl md:text-5xl font-bold mb-2 md:mb-4 line-clamp-2">
         ${content.title}
       </h2>
 
-      <!-- 별점과 정보 -->
-      <div class="flex items-center gap-4 mb-6 text-gray-300">
+      <!-- 별점과 날짜 (모바일: 한 줄로 컴팩트하게) -->
+      <div class="flex items-center gap-3 mb-2 md:mb-4 text-sm md:text-base text-gray-300">
         <div class="flex items-center">
-          <span class="text-yellow-400 text-xl">${stars}</span>
-          <span class="ml-2">${avgRating.toFixed(1)}</span>
+          <span class="text-yellow-400">${stars}</span>
+          <span class="ml-1">${avgRating.toFixed(1)}</span>
         </div>
-        <span>${content.release_date || '날짜 미상'}</span>
-        <span>${content.type === 'movie' ? '영화' : '도서'}</span>
+        <span>${content.release_date || ''}</span>
       </div>
 
-      <!-- 설명 -->
-      <p class="text-lg text-gray-300 mb-8 max-w-2xl line-clamp-3">
-        ${content.description || '설명이 없습니다.'}
+      <!-- 설명 (모바일: 2줄, 데스크탑: 3줄) -->
+      <p class="text-sm md:text-base text-gray-300 mb-3 md:mb-6 line-clamp-2 md:line-clamp-3 max-w-2xl">
+        ${content.description || ''}
       </p>
 
-      <!-- 버튼들 -->
-      <div class="flex gap-4">
+      <!-- 버튼들 (모바일: 작게, 가로 배치) -->
+      <div class="flex gap-2 md:gap-4">
         ${content.review_count > 0
-          ? `<button onclick="viewContentDetail(${content.id})" class="bg-white text-black px-8 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
-               내 리뷰 보기
+          ? `<button onclick="viewContentDetail(${content.id})" class="bg-white text-black px-4 md:px-8 py-2 md:py-3 rounded-lg text-sm md:text-base font-semibold hover:bg-gray-200 transition">
+               리뷰 보기
              </button>`
-          : `<button onclick="openReviewModal(${content.id}, '${content.title}')" class="bg-white text-black px-8 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
-               리뷰 작성하기
+          : `<button onclick="openReviewModal(${content.id}, '${content.title}')" class="bg-white text-black px-4 md:px-8 py-2 md:py-3 rounded-lg text-sm md:text-base font-semibold hover:bg-gray-200 transition">
+               리뷰 작성
              </button>`
         }
-        <button onclick="deleteContent(${content.id})" class="bg-red-600/70 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-600 transition">
-          삭제하기
+        <button onclick="deleteContent(${content.id})" class="bg-[#333]/80 text-white px-4 md:px-8 py-2 md:py-3 rounded-lg text-sm md:text-base font-semibold hover:bg-[#444] transition">
+          삭제
         </button>
       </div>
     </div>
