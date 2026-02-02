@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Theater v1.0 - 나만의 책·영화 아카이브</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 폰트: 더 세련된 느낌을 위한 구글 폰트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- 헤더 영역 -->
+    <!-- sticky: 스크롤해도 상단에 고정되는 속성 -->
+    <!-- bg-gradient-to-b: 위에서 아래로 색상이 점진적으로 변하는 그라데이션 -->
+    <!-- z-50: 다른 요소들보다 앞에 보이도록 설정 (숫자가 클수록 앞) -->
+    <header class="sticky top-0 bg-gradient-to-b from-black to-gray-900 z-50 py-4 px-4 md:px-8">
+        <!-- flex: 가로로 요소를 배치 -->
+        <!-- justify-between: 요소들을 양 끝으로 배치 (중간은 자동으로 빈 공간) -->
+        <!-- items-center: 세로 가운데 정렬 -->
+        <div class="flex justify-between items-center max-w-7xl mx-auto">
+
+            <!-- 로고 -->
+            <!-- text-3xl: 텍스트 크기를 크게 (3배) -->
+            <!-- font-bold: 글자를 굵게 -->
+            <!-- bg-gradient-to-r: 왼쪽에서 오른쪽으로 색상이 변하는 그라데이션 -->
+            <!-- bg-clip-text: 그라데이션을 텍스트 모양으로 자름 -->
+            <!-- text-transparent: 텍스트를 투명하게 해서 그라데이션만 보이게 -->
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent cursor-pointer" onclick="window.location.reload()">
+                🎬 My Theater
+            </h1>
+
+            <!-- 검색 및 추가 영역 -->
+            <div class="flex items-center gap-4">
+                <!-- 콘텐츠 추가 버튼 -->
+                <button onclick="toggleSearchModal()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-semibold transition">
+                    ➕ 콘텐츠 추가
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 검색 모달 (팝업) -->
+    <div id="searchModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <!-- 모달 헤더 -->
+            <div class="sticky top-0 bg-gray-800 border-b border-gray-700 p-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold">콘텐츠 검색 및 추가</h2>
+                <button onclick="toggleSearchModal()" class="text-gray-400 hover:text-white text-3xl">&times;</button>
+            </div>
+
+            <!-- 검색 영역 -->
+            <div class="p-6">
+                <!-- 타입 선택 버튼 -->
+                <div class="flex gap-3 mb-4">
+                    <button onclick="setSearchType('movie')" id="movieTypeBtn" class="flex-1 bg-purple-600 text-white px-4 py-3 rounded-lg font-semibold transition">
+                        🎬 영화 검색
+                    </button>
+                    <button onclick="setSearchType('book')" id="bookTypeBtn" class="flex-1 bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold hover:bg-gray-600 transition">
+                        📚 도서 검색
+                    </button>
+                </div>
+
+                <!-- 검색창 -->
+                <div class="flex gap-3 mb-6">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="제목을 입력하세요..."
+                        class="flex-1 bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        onkeypress="if(event.key === 'Enter') searchContent()"
+                    >
+                    <button onclick="searchContent()" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition">
+                        🔍 검색
+                    </button>
+                </div>
+
+                <!-- 로딩 표시 -->
+                <div id="searchLoading" class="hidden text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+                    <p class="mt-4 text-gray-400">검색 중...</p>
+                </div>
+
+                <!-- 검색 결과 -->
+                <div id="searchResults" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- 여기에 검색 결과가 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 리뷰 작성 모달 -->
+    <div id="reviewModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-xl max-w-2xl w-full">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                <h2 class="text-2xl font-bold" id="reviewModalTitle">리뷰 작성</h2>
+                <button onclick="closeReviewModal()" class="text-gray-400 hover:text-white text-3xl">&times;</button>
+            </div>
+
+            <form onsubmit="submitReview(event)" class="p-6">
+                <input type="hidden" id="reviewContentId">
+
+                <!-- 별점 선택 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-3">별점 *</label>
+                    <div class="flex gap-2" id="starRating">
+                        <span onclick="setRating(1)" data-rating="1" class="text-4xl cursor-pointer text-gray-600 hover:text-yellow-400 transition">★</span>
+                        <span onclick="setRating(2)" data-rating="2" class="text-4xl cursor-pointer text-gray-600 hover:text-yellow-400 transition">★</span>
+                        <span onclick="setRating(3)" data-rating="3" class="text-4xl cursor-pointer text-gray-600 hover:text-yellow-400 transition">★</span>
+                        <span onclick="setRating(4)" data-rating="4" class="text-4xl cursor-pointer text-gray-600 hover:text-yellow-400 transition">★</span>
+                        <span onclick="setRating(5)" data-rating="5" class="text-4xl cursor-pointer text-gray-600 hover:text-yellow-400 transition">★</span>
+                    </div>
+                    <input type="hidden" id="ratingValue" required>
+                </div>
+
+                <!-- 한 줄 평 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2">한 줄 평</label>
+                    <input
+                        type="text"
+                        id="oneLiner"
+                        placeholder="예: 인생 영화입니다!"
+                        maxlength="100"
+                        class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                </div>
+
+                <!-- 상세 감상평 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2">상세 감상평</label>
+                    <textarea
+                        id="detailedReview"
+                        rows="5"
+                        placeholder="감상평을 자유롭게 작성해주세요..."
+                        class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-vertical"
+                    ></textarea>
+                </div>
+
+                <!-- 버튼들 -->
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeReviewModal()" class="bg-gray-600 hover:bg-gray-700 px-6 py-3 rounded-lg font-semibold transition">
+                        취소
+                    </button>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition">
+                        저장
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 리뷰 상세 보기 모달 -->
+    <!-- 리뷰 내용을 아름다운 카드 형태로 표시하고 수정/삭제 기능 제공 -->
+    <div id="reviewDetailModal" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+        <!-- 모달 컨테이너: max-h-[90vh]로 최대 높이 제한, overflow-y-auto로 스크롤 가능 -->
+        <div class="bg-gray-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+
+            <!-- 헤더: sticky top-0으로 스크롤 시에도 고정 -->
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center sticky top-0 bg-gray-800 z-10">
+                <!-- 제목: 동적으로 콘텐츠 제목이 들어감 -->
+                <h2 class="text-2xl font-bold" id="reviewDetailTitle">📝 리뷰</h2>
+                <!-- 닫기 버튼: × 기호 -->
+                <button onclick="closeReviewDetailModal()" class="text-gray-400 hover:text-white text-3xl">&times;</button>
+            </div>
+
+            <!-- 리뷰 목록 컨테이너 -->
+            <!-- space-y-6: 각 리뷰 카드 사이에 24px 간격 -->
+            <div id="reviewsList" class="p-6 space-y-6">
+                <!-- 동적으로 리뷰 카드가 추가됩니다 -->
+                <!-- JavaScript의 viewContentDetail() 함수에서 생성 -->
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 히어로 섹션 (오늘의 추천) -->
+    <!-- relative: 내부의 절대 위치 요소들의 기준점 -->
+    <!-- h-[70vh]: 화면 높이의 70% 크기 -->
+    <section id="heroSection" class="relative h-[70vh] mb-8">
+        <!-- 배경 이미지 영역 -->
+        <!-- absolute: 부모 요소(section) 안에서 절대 위치 -->
+        <!-- inset-0: top, right, bottom, left 모두 0 (전체 영역 차지) -->
+        <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900">
+            <!-- 이미지 대신 그라데이션 배경 사용 (실제로는 영화 포스터 이미지를 여기에 넣을 수 있어요) -->
+        </div>
+
+        <!-- 어두운 오버레이 (텍스트가 잘 보이도록) -->
+        <!-- bg-black/50: 검은색 배경에 50% 투명도 -->
+        <div class="absolute inset-0 bg-black/50"></div>
+
+        <!-- 텍스트 내용 -->
+        <!-- z-10: 배경보다 앞에 보이도록 -->
+        <div class="relative z-10 h-full flex flex-col justify-end px-4 md:px-16 pb-16">
+            <!-- flex-col: 세로 방향으로 요소 배치 -->
+            <!-- justify-end: 아래쪽으로 정렬 -->
+
+            <!-- 카테고리 태그 -->
+            <div class="mb-4">
+                <!-- inline-block: 내용 크기만큼만 공간 차지 -->
+                <span class="inline-block bg-purple-600 px-4 py-1 rounded-full text-sm font-semibold">
+                    오늘의 추천
+                </span>
+            </div>
+
+            <!-- 제목 -->
+            <!-- text-5xl: 매우 큰 텍스트 (5배) -->
+            <!-- md:text-7xl: 중간 크기 이상 화면에서는 7배 크기 -->
+            <h2 class="text-5xl md:text-7xl font-bold mb-4 max-w-3xl">
+                인터스텔라
+            </h2>
+
+            <!-- 별점과 정보 -->
+            <div class="flex items-center gap-4 mb-6 text-gray-300">
+                <!-- gap-4: 요소들 사이 간격 4 (약 16픽셀) -->
+                <div class="flex items-center">
+                    <span class="text-yellow-400 text-xl">★★★★★</span>
+                    <span class="ml-2">5.0</span>
+                </div>
+                <span>2024년 12월</span>
+                <span>영화</span>
+            </div>
+
+            <!-- 설명 -->
+            <!-- max-w-2xl: 최대 너비 제한 (읽기 편한 길이) -->
+            <p class="text-lg text-gray-300 mb-8 max-w-2xl">
+                시간과 공간을 넘어선 감동적인 SF 서사. 인류의 생존을 위해 우주로 떠난 탐험가들의 이야기가 펼쳐집니다.
+                크리스토퍼 놀란 감독의 대표작으로, 과학적 정확성과 감성이 완벽하게 조화를 이룹니다.
+            </p>
+
+            <!-- 버튼들 -->
+            <div class="flex gap-4">
+                <!-- 리뷰 보기 버튼 -->
+                <!-- bg-white: 흰색 배경 -->
+                <!-- text-black: 검은색 텍스트 -->
+                <!-- hover:bg-gray-200: 마우스 올리면 회색으로 변경 -->
+                <!-- transition: 부드러운 색상 전환 효과 -->
+                <button class="bg-white text-black px-8 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
+                    내 리뷰 보기
+                </button>
+
+                <!-- 편집 버튼 -->
+                <!-- bg-gray-600/70: 회색 배경에 70% 투명도 -->
+                <button class="bg-gray-600/70 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-600 transition">
+                    편집하기
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 필터 영역 -->
+    <section class="bg-gray-800 py-4 px-4 md:px-8 sticky top-16 z-40">
+        <div class="max-w-7xl mx-auto flex flex-wrap gap-4 items-center">
+            <label class="text-gray-400 font-semibold">필터:</label>
+
+            <!-- 타입 필터 -->
+            <select id="typeFilter" onchange="loadContents()" class="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <option value="">전체</option>
+                <option value="movie">영화만</option>
+                <option value="book">도서만</option>
+            </select>
+
+            <!-- 정렬 옵션 -->
+            <select id="sortFilter" onchange="loadContents()" class="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <option value="date">최신순</option>
+                <option value="rating">평점순</option>
+            </select>
+
+            <!-- 새로고침 버튼 -->
+            <button onclick="loadContents()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+                🔄 새로고침
+            </button>
+        </div>
+    </section>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="px-4 md:px-8 pb-16 space-y-12 mt-8">
+        <!-- space-y-12: 자식 요소들 사이에 세로 간격 12 (약 48픽셀) -->
+
+        <!-- 로딩 표시 -->
+        <div id="contentsLoading" class="hidden text-center py-16">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500"></div>
+            <p class="mt-4 text-gray-400 text-lg">불러오는 중...</p>
+        </div>
+
+        <!-- 빈 상태 표시 -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="text-6xl mb-4">📭</div>
+            <h2 class="text-2xl font-bold mb-2">아직 저장된 콘텐츠가 없습니다</h2>
+            <p class="text-gray-400">위 버튼을 눌러 영화나 도서를 검색해서 추가해보세요!</p>
+        </div>
+
+        <!-- 내 아카이브 -->
+        <section id="mainArchive">
+            <h3 class="text-2xl font-bold mb-6">내 아카이브</h3>
+            <div id="contentsGrid" class="grid gap-4 justify-center" style="grid-template-columns: repeat(auto-fill, 192px);">
+                <!-- 여기에 저장된 콘텐츠가 동적으로 추가됩니다 -->
+            </div>
+        </section>
+
+        <!-- 최근 본 콘텐츠 섹션 (기존 정적 데이터는 숨김 처리) -->
+        <section class="hidden">
+            <h3 class="text-2xl font-bold mb-6">최근 본 콘텐츠</h3>
+
+            <!-- 카드 컨테이너 -->
+            <!-- overflow-x-auto: 가로로 넘치는 내용은 스크롤 -->
+            <!-- scrollbar-hide: 스크롤바 숨김 (Tailwind 플러그인 필요하지만 브라우저 기본으로 처리) -->
+            <div class="flex gap-4 overflow-x-auto pb-4">
+                <!-- gap-4: 카드들 사이 간격 -->
+
+                <!-- 카드 1 -->
+                <!-- group: 이 요소와 자식 요소들을 그룹으로 묶음 (호버 효과 공유용) -->
+                <!-- flex-shrink-0: 크기가 줄어들지 않도록 고정 -->
+                <div class="group flex-shrink-0 w-48 cursor-pointer">
+                    <!-- 이미지 컨테이너 -->
+                    <!-- relative: 내부 요소들의 기준점 -->
+                    <!-- overflow-hidden: 넘치는 부분 숨김 (확대 효과를 위해) -->
+                    <div class="relative overflow-hidden rounded-lg mb-3">
+                        <!-- aspect-[2/3]: 가로세로 비율 2:3 (책/영화 포스터 비율) -->
+                        <!-- bg-gradient-to-br: 왼쪽 위에서 오른쪽 아래로 그라데이션 -->
+                        <div class="aspect-[2/3] bg-gradient-to-br from-blue-500 to-purple-600"></div>
+
+                        <!-- 호버 시 나타나는 오버레이 -->
+                        <!-- opacity-0: 기본적으로 투명 (안 보임) -->
+                        <!-- group-hover:opacity-100: 그룹에 마우스 올리면 불투명하게 -->
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-white font-semibold">자세히 보기</span>
+                        </div>
+                    </div>
+
+                    <!-- 제목 -->
+                    <!-- truncate: 긴 텍스트를 잘라내고 ... 표시 -->
+                    <h4 class="font-semibold truncate">덴마크어 수업</h4>
+
+                    <!-- 부가 정보 -->
+                    <p class="text-sm text-gray-400">책 · 2024.11</p>
+
+                    <!-- 별점 -->
+                    <div class="flex items-center mt-1">
+                        <span class="text-yellow-400 text-sm">★★★★☆</span>
+                        <span class="text-sm text-gray-400 ml-1">4.0</span>
+                    </div>
+                </div>
+
+                <!-- 카드 2 -->
+                <div class="group flex-shrink-0 w-48 cursor-pointer">
+                    <div class="relative overflow-hidden rounded-lg mb-3">
+                        <div class="aspect-[2/3] bg-gradient-to-br from-red-500 to-orange-600"></div>
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-white font-semibold">자세히 보기</span>
+                        </div>
+                    </div>
+                    <h4 class="font-semibold truncate">듄: 파트2</h4>
+                    <p class="text-sm text-gray-400">영화 · 2024.10</p>
+                    <div class="flex items-center mt-1">
+                        <span class="text-yellow-400 text-sm">★★★★★</span>
+                        <span class="text-sm text-gray-400 ml-1">5.0</span>
+                    </div>
+                </div>
+
+                <!-- 카드 3 -->
+                <div class="group flex-shrink-0 w-48 cursor-pointer">
+                    <div class="relative overflow-hidden rounded-lg mb-3">
+                        <div class="aspect-[2/3] bg-gradient-to-br from-green-500 to-teal-600"></div>
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-white font-semibold">자세히 보기</span>
+                        </div>
+                    </div>
+                    <h4 class="font-semibold truncate">오펜하이머</h4>
+                    <p class="text-sm text-gray-400">영화 · 2024.09</p>
+                    <div class="flex items-center mt-1">
+                        <span class="text-yellow-400 text-sm">★★★★☆</span>
+                        <span class="text-sm text-gray-400 ml-1">4.5</span>
+                    </div>
+                </div>
+
+                <!-- 카드 4 -->
+                <div class="group flex-shrink-0 w-48 cursor-pointer">
+                    <div class="relative overflow-hidden rounded-lg mb-3">
+                        <div class="aspect-[2/3] bg-gradient-to-br from-pink-500 to-rose-600"></div>
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-white font-semibold">자세히 보기</span>
+                        </div>
+                    </div>
+                    <h4 class="font-semibold truncate">채식주의자</h4>
+                    <p class="text-sm text-gray-400">책 · 2024.08</p>
+                    <div class="flex items-center mt-1">
+                        <span class="text-yellow-400 text-sm">★★★★★</span>
+                        <span class="text-sm text-gray-400 ml-1">5.0</span>
+                    </div>
+                </div>
+
+                <!-- 카드 5 -->
+                <div class="group flex-shrink-0 w-48 cursor-pointer">
+                    <div class="relative overflow-hidden rounded-lg mb-3">
+                        <div class="aspect-[2/3] bg-gradient-to-br from-indigo-500 to-purple-600"></div>
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-white font-semibold">자세히 보기</span>
+                        </div>
+                    </div>
+                    <h4 class="font-semibold truncate">노량: 죽음의 바다</h4>
+                    <p class="text-sm text-gray-400">영화 · 2024.07</p>
+                    <div class="flex items-center mt-1">
+                        <span class="text-yellow-400 text-sm">★★★☆☆</span>
+                        <span class="text-sm text-gray-400 ml-1">3.5</span>
+                    </div>
+                </div>
+
+                <!-- 카드 6 -->
+                <div class="group flex-shrink-0 w-48 cursor-pointer">
+                    <div class="relative overflow-hidden rounded-lg mb-3">
+                        <div class="aspect-[2/3] bg-gradient-to-br from-yellow-500 to-amber-600"></div>
+                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-white font-semibold">자세히 보기</span>
+                        </div>
+                    </div>
+                    <h4 class="font-semibold truncate">1984</h4>
+                    <p class="text-sm text-gray-400">책 · 2024.06</p>
+                    <div class="flex items-center mt-1">
+                        <span class="text-yellow-400 text-sm">★★★★★</span>
+                        <span class="text-sm text-gray-400 ml-1">5.0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 영화 리뷰 섹션 -->
+        <section>
+            <!-- 섹션 헤더 -->
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">내가 본 영화</h3>
+                <!-- 전체보기 링크 -->
+                <!-- onclick: 클릭 시 viewAllMovies() 함수 실행 -->
+                <!-- return false: 링크의 기본 동작(페이지 이동) 방지 -->
+                <a href="#" onclick="viewAllMovies(); return false;" class="text-purple-400 hover:underline">전체보기 →</a>
+            </div>
+
+            <!-- 영화 카드 그리드 (JavaScript로 동적 생성됨) -->
+            <!-- overflow-x-auto: 가로 스크롤 가능 -->
+            <!-- flex gap-4: 카드 사이 간격 4 -->
+            <!-- pb-4: 아래 패딩 4 (스크롤바 공간 확보) -->
+            <div id="moviesGrid" class="flex gap-4 overflow-x-auto pb-4">
+                <!-- 여기에 JavaScript의 loadMoviesSection() 함수로 영화 카드가 동적으로 추가됩니다 -->
+            </div>
+        </section>
+
+        <!-- 책 리뷰 섹션 -->
+        <section>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">내가 읽은 책</h3>
+                <!-- 전체보기 링크 -->
+                <!-- onclick: 클릭 시 viewAllBooks() 함수 실행 -->
+                <!-- return false: 링크의 기본 동작(페이지 이동) 방지 -->
+                <a href="#" onclick="viewAllBooks(); return false;" class="text-purple-400 hover:underline">전체보기 →</a>
+            </div>
+
+            <!-- 책 카드 그리드 (JavaScript로 동적 생성됨) -->
+            <!-- overflow-x-auto: 가로 스크롤 가능 -->
+            <!-- flex gap-4: 카드 사이 간격 4 -->
+            <!-- pb-4: 아래 패딩 4 (스크롤바 공간 확보) -->
+            <div id="booksGrid" class="flex gap-4 overflow-x-auto pb-4">
+                <!-- 여기에 JavaScript의 loadBooksSection() 함수로 책 카드가 동적으로 추가됩니다 -->
+            </div>
+        </section>
+
+        <!-- 내가 쓴 리뷰 (그리드 레이아웃) -->
+        <!-- 내가 쓴 리뷰 섹션 -->
+        <!-- 동적으로 데이터베이스에서 최신 리뷰를 불러와서 표시 -->
+        <section class="mb-12">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">📝 내가 쓴 리뷰</h2>
+                <!-- 전체보기 버튼: viewAllReviews() 함수 호출 -->
+                <button onclick="viewAllReviews()" class="text-purple-400 hover:text-purple-300 text-sm font-semibold">
+                    전체보기 →
+                </button>
+            </div>
+
+            <!-- 동적 로딩 컨테이너 -->
+            <!-- JavaScript의 loadReviewsSection() 함수로 리뷰 카드가 동적으로 추가됩니다 -->
+            <!-- grid: CSS Grid 레이아웃 -->
+            <!-- grid-cols-1: 모바일에서 1열 -->
+            <!-- md:grid-cols-2: 태블릿에서 2열 -->
+            <!-- lg:grid-cols-3: 데스크탑에서 3열 -->
+            <!-- gap-6: 카드 사이 간격 24px -->
+            <div id="reviewsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 리뷰 카드가 여기에 동적으로 추가됩니다 -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 푸터 -->
+    <!-- border-t: 위쪽에 얇은 테두리 -->
+    <!-- border-gray-800: 테두리 색상을 어두운 회색으로 -->
+    <footer class="border-t border-gray-800 mt-16 py-8 px-4 md:px-8">
+        <!-- text-center: 텍스트 가운데 정렬 -->
+        <div class="text-center text-gray-500 text-sm">
+            <p class="mb-2">My Theater - 나만의 책·영화 아카이브</p>
+            <p>&copy; 2024 All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 외부 JavaScript 파일 연결 -->
+    <script src="client.js"></script>
+</body>
+</html>
