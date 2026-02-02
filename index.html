@@ -33,25 +33,29 @@
             }
         }
 
-        /* 가로 스크롤 컨테이너 */
-        /* Netflix 스타일의 가로 스크롤 레이아웃 */
-        .horizontal-scroll {
+        /* 가로 자동 롤링 컨테이너 */
+        /* 왼쪽으로 자동 스크롤되는 레이아웃 */
+        .horizontal-roller {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .horizontal-roller-inner {
             display: flex;
             gap: 1rem;
-            overflow-x: auto;
-            padding-bottom: 1rem;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
+            animation: horizontalRoll 20s linear infinite;
+            width: max-content;
         }
 
-        /* 스크롤바 숨김 (깔끔한 UI) */
-        .horizontal-scroll::-webkit-scrollbar {
-            display: none;
+        /* 왼쪽으로 이동하는 애니메이션 (우측 방향 롤링) */
+        @keyframes horizontalRoll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
-        .horizontal-scroll {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        /* 마우스 호버 시 애니메이션 일시정지 */
+        .horizontal-roller:hover .horizontal-roller-inner {
+            animation-play-state: paused;
         }
 
         /* 스냅 스크롤 (카드에 딱 맞게 멈춤) */
@@ -376,8 +380,10 @@
         <!-- 내 아카이브 -->
         <section id="mainArchive">
             <h3 class="text-2xl font-bold mb-6">내 아카이브</h3>
-            <div id="contentsGrid" class="horizontal-scroll">
-                <!-- 여기에 저장된 콘텐츠가 동적으로 추가됩니다 -->
+            <div id="contentsGrid" class="horizontal-roller">
+                <div id="contentsInner" class="horizontal-roller-inner">
+                    <!-- 여기에 저장된 콘텐츠가 동적으로 추가됩니다 -->
+                </div>
             </div>
         </section>
 
@@ -522,8 +528,10 @@
             <!-- overflow-x-auto: 가로 스크롤 가능 -->
             <!-- flex gap-4: 카드 사이 간격 4 -->
             <!-- pb-4: 아래 패딩 4 (스크롤바 공간 확보) -->
-            <div id="moviesGrid" class="horizontal-scroll">
-                <!-- 여기에 JavaScript의 loadMoviesSection() 함수로 영화 카드가 동적으로 추가됩니다 -->
+            <div id="moviesGrid" class="horizontal-roller">
+                <div id="moviesInner" class="horizontal-roller-inner">
+                    <!-- 여기에 JavaScript의 loadMoviesSection() 함수로 영화 카드가 동적으로 추가됩니다 -->
+                </div>
             </div>
         </section>
 
@@ -541,8 +549,10 @@
             <!-- overflow-x-auto: 가로 스크롤 가능 -->
             <!-- flex gap-4: 카드 사이 간격 4 -->
             <!-- pb-4: 아래 패딩 4 (스크롤바 공간 확보) -->
-            <div id="booksGrid" class="horizontal-scroll">
-                <!-- 여기에 JavaScript의 loadBooksSection() 함수로 책 카드가 동적으로 추가됩니다 -->
+            <div id="booksGrid" class="horizontal-roller">
+                <div id="booksInner" class="horizontal-roller-inner">
+                    <!-- 여기에 JavaScript의 loadBooksSection() 함수로 책 카드가 동적으로 추가됩니다 -->
+                </div>
             </div>
         </section>
 

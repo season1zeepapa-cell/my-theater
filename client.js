@@ -403,11 +403,21 @@ function displayHeroContent(content) {
 }
 
 // ====================================
-// 10단계: 콘텐츠 목록을 그리드로 표시
+// 10단계: 콘텐츠 목록을 자동 롤링으로 표시
 // ====================================
 function displayContents(contents) {
-  const grid = document.getElementById('contentsGrid');
-  grid.innerHTML = '';
+  const inner = document.getElementById('contentsInner');
+  if (!inner) {
+    console.error('contentsInner 요소를 찾을 수 없습니다');
+    return;
+  }
+  inner.innerHTML = '';
+
+  // 콘텐츠가 없으면 애니메이션 중지
+  if (contents.length === 0) {
+    inner.style.animation = 'none';
+    return;
+  }
 
   contents.forEach(content => {
     const card = document.createElement('div');
@@ -429,15 +439,7 @@ function displayContents(contents) {
         ${posterHTML}
 
         <!-- 타입 라벨 배지 (왼쪽 상단) -->
-        <!-- absolute: 절대 위치 지정 -->
-        <!-- top-2 left-2: 위에서 8px, 왼쪽에서 8px 떨어진 위치 -->
-        <!-- z-10: 다른 요소들 위에 표시 -->
         <div class="absolute top-2 left-2 z-10">
-          <!-- 영화는 보라색, 책은 초록색 배지 -->
-          <!-- px-2 py-1: 가로 패딩 8px, 세로 패딩 4px -->
-          <!-- rounded: 모서리 둥글게 -->
-          <!-- text-xs: 작은 글씨 크기 -->
-          <!-- font-semibold: 글씨 두껍게 -->
           <span class="${content.type === 'movie' ? 'bg-purple-600' : 'bg-green-600'} text-white px-2 py-1 rounded text-xs font-semibold">
             ${content.type === 'movie' ? '🎬 영화' : '📚 책'}
           </span>
@@ -468,8 +470,16 @@ function displayContents(contents) {
       </div>
     `;
 
-    grid.appendChild(card);
+    inner.appendChild(card);
   });
+
+  // 무한 롤링을 위해 카드 복제 (2배로)
+  const originalCards = inner.innerHTML;
+  inner.innerHTML = originalCards + originalCards;
+
+  // 콘텐츠 개수에 따라 애니메이션 속도 조절
+  const duration = Math.max(15, contents.length * 3);
+  inner.style.animationDuration = `${duration}s`;
 }
 
 // ====================================
@@ -922,122 +932,124 @@ function createContentCard(content) {
 }
 
 // ====================================
-// 18단계: 영화 섹션 로드 (최신 5개)
+// 18단계: 영화 섹션 로드 (자동 롤링)
 // ====================================
-// loadMoviesSection: 데이터베이스에서 최신 영화 5개를 가져와서 화면에 표시
+// loadMoviesSection: 리뷰가 있는 영화를 자동 롤링으로 표시
 async function loadMoviesSection() {
   try {
     // API 호출: 영화만 필터링, 최신순 정렬
-    // fetch: 서버와 통신하는 함수
-    // type=movie: 영화만 가져오기
-    // sort=date: 최신순으로 정렬
     const response = await fetch('/api/contents?type=movie&sort=date');
 
-    // 서버 응답이 정상이 아니면 에러 발생
     if (!response.ok) {
       throw new Error('영화 목록을 불러올 수 없습니다');
     }
 
-    // JSON 형태로 변환
     const movies = await response.json();
 
-    // ⭐ "내가 본 영화" = 리뷰가 있는 영화만 표시
-    // filter: 조건에 맞는 항목만 걸러냄 (필터링)
-    // review_count > 0: 리뷰가 1개 이상인 영화만 선택
+    // "내가 본 영화" = 리뷰가 있는 영화만 표시
     const moviesWithReview = movies.filter(movie => {
-      const reviewCount = parseInt(movie.review_count) || 0; // 문자열을 숫자로 변환
-      return reviewCount > 0; // 리뷰가 1개 이상이면 true
+      const reviewCount = parseInt(movie.review_count) || 0;
+      return reviewCount > 0;
     });
 
-    // 필터링된 영화 중 최신 5개만 선택
-    // slice(0, 5): 배열에서 처음부터 5개 요소만 추출
-    const latestMovies = moviesWithReview.slice(0, 5);
+    // inner 컨테이너 찾기
+    const inner = document.getElementById('moviesInner');
+    if (!inner) {
+      console.error('moviesInner 요소를 찾을 수 없습니다');
+      return;
+    }
 
-    // 그리드 컨테이너 찾기
-    // getElementById: HTML에서 id로 요소 찾기
-    const grid = document.getElementById('moviesGrid');
-
-    // 기존 내용 초기화 (빈 HTML로 만들기)
-    grid.innerHTML = '';
+    inner.innerHTML = '';
 
     // 리뷰를 작성한 영화가 없으면 안내 메시지 표시
-    if (latestMovies.length === 0) {
-      // 사용자에게 다음 액션 안내
-      grid.innerHTML = '<p class="text-gray-400 text-sm">리뷰를 작성한 영화가 없습니다. 아카이브에서 리뷰를 작성해보세요!</p>';
-      return; // 함수 종료
+    if (moviesWithReview.length === 0) {
+      inner.innerHTML = '<p class="text-gray-400 text-sm py-4">리뷰를 작성한 영화가 없습니다. 아카이브에서 리뷰를 작성해보세요!</p>';
+      inner.style.animation = 'none';
+      return;
     }
 
     // 각 영화에 대해 카드 생성
-    // forEach: 배열의 각 요소마다 반복 실행
-    latestMovies.forEach(movie => {
-      const card = createContentCard(movie); // 카드 생성
-      grid.appendChild(card); // 그리드에 카드 추가
+    moviesWithReview.forEach(movie => {
+      const card = createContentCard(movie);
+      inner.appendChild(card);
     });
 
+    // 무한 롤링을 위해 카드 복제
+    const originalCards = inner.innerHTML;
+    inner.innerHTML = originalCards + originalCards;
+
+    // 콘텐츠 개수에 따라 애니메이션 속도 조절
+    const duration = Math.max(12, moviesWithReview.length * 4);
+    inner.style.animationDuration = `${duration}s`;
+
   } catch (error) {
-    // 에러가 발생하면 콘솔에 출력하고 사용자에게 알림
     console.error('영화 섹션 로드 오류:', error);
-    document.getElementById('moviesGrid').innerHTML =
-      '<p class="text-red-400 text-sm">영화를 불러오는 중 오류가 발생했습니다.</p>';
+    const inner = document.getElementById('moviesInner');
+    if (inner) {
+      inner.innerHTML = '<p class="text-red-400 text-sm">영화를 불러오는 중 오류가 발생했습니다.</p>';
+      inner.style.animation = 'none';
+    }
   }
 }
 
 // ====================================
-// 19단계: 책 섹션 로드 (최신 5개)
+// 19단계: 책 섹션 로드 (자동 롤링)
 // ====================================
-// loadBooksSection: 데이터베이스에서 최신 책 5개를 가져와서 화면에 표시
+// loadBooksSection: 리뷰가 있는 책을 자동 롤링으로 표시
 async function loadBooksSection() {
   try {
     // API 호출: 책만 필터링, 최신순 정렬
-    // type=book: 책만 가져오기
-    // sort=date: 최신순으로 정렬
     const response = await fetch('/api/contents?type=book&sort=date');
 
-    // 서버 응답이 정상이 아니면 에러 발생
     if (!response.ok) {
       throw new Error('책 목록을 불러올 수 없습니다');
     }
 
-    // JSON 형태로 변환
     const books = await response.json();
 
-    // ⭐ "내가 읽은 책" = 리뷰가 있는 책만 표시
-    // filter: 조건에 맞는 항목만 걸러냄 (필터링)
-    // review_count > 0: 리뷰가 1개 이상인 책만 선택
+    // "내가 읽은 책" = 리뷰가 있는 책만 표시
     const booksWithReview = books.filter(book => {
-      const reviewCount = parseInt(book.review_count) || 0; // 문자열을 숫자로 변환
-      return reviewCount > 0; // 리뷰가 1개 이상이면 true
+      const reviewCount = parseInt(book.review_count) || 0;
+      return reviewCount > 0;
     });
 
-    // 필터링된 책 중 최신 5개만 선택
-    // slice(0, 5): 배열에서 처음부터 5개 요소만 추출
-    const latestBooks = booksWithReview.slice(0, 5);
+    // inner 컨테이너 찾기
+    const inner = document.getElementById('booksInner');
+    if (!inner) {
+      console.error('booksInner 요소를 찾을 수 없습니다');
+      return;
+    }
 
-    // 그리드 컨테이너 찾기
-    const grid = document.getElementById('booksGrid');
-
-    // 기존 내용 초기화 (빈 HTML로 만들기)
-    grid.innerHTML = '';
+    inner.innerHTML = '';
 
     // 리뷰를 작성한 책이 없으면 안내 메시지 표시
-    if (latestBooks.length === 0) {
-      // 사용자에게 다음 액션 안내
-      grid.innerHTML = '<p class="text-gray-400 text-sm">리뷰를 작성한 책이 없습니다. 아카이브에서 리뷰를 작성해보세요!</p>';
-      return; // 함수 종료
+    if (booksWithReview.length === 0) {
+      inner.innerHTML = '<p class="text-gray-400 text-sm py-4">리뷰를 작성한 책이 없습니다. 아카이브에서 리뷰를 작성해보세요!</p>';
+      inner.style.animation = 'none';
+      return;
     }
 
     // 각 책에 대해 카드 생성
-    // forEach: 배열의 각 요소마다 반복 실행
-    latestBooks.forEach(book => {
-      const card = createContentCard(book); // 카드 생성
-      grid.appendChild(card); // 그리드에 카드 추가
+    booksWithReview.forEach(book => {
+      const card = createContentCard(book);
+      inner.appendChild(card);
     });
 
+    // 무한 롤링을 위해 카드 복제
+    const originalCards = inner.innerHTML;
+    inner.innerHTML = originalCards + originalCards;
+
+    // 콘텐츠 개수에 따라 애니메이션 속도 조절
+    const duration = Math.max(12, booksWithReview.length * 4);
+    inner.style.animationDuration = `${duration}s`;
+
   } catch (error) {
-    // 에러가 발생하면 콘솔에 출력하고 사용자에게 알림
     console.error('책 섹션 로드 오류:', error);
-    document.getElementById('booksGrid').innerHTML =
-      '<p class="text-red-400 text-sm">책을 불러오는 중 오류가 발생했습니다.</p>';
+    const inner = document.getElementById('booksInner');
+    if (inner) {
+      inner.innerHTML = '<p class="text-red-400 text-sm">책을 불러오는 중 오류가 발생했습니다.</p>';
+      inner.style.animation = 'none';
+    }
   }
 }
 
